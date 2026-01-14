@@ -28,38 +28,20 @@
       "media": [
         {
           "type": "font",
-          "name": "PIX_CHICAGO_18",
-          "file": "pixChicago_scaled.ttf",
-          "characterRegex": "[A-Z0-9 :]"
-        },
-        {
-          "type": "font",
           "name": "PIX_CHICAGO_20",
           "file": "pixChicago_scaled.ttf",
           "characterRegex": "[A-Z0-9 :]"
         },
         {
           "type": "font",
-          "name": "PIX_CHICAGO_27",
-          "file": "pixChicago_scaled.ttf",
-          "characterRegex": "[0-9:]"
-        },
-        {
-          "type": "font",
-          "name": "PIX_CHICAGO_36",
-          "file": "pixChicago_scaled.ttf",
-          "characterRegex": "[0-9:]"
-        },
-        {
-          "type": "font",
           "name": "PIX_CHICAGO_38",
-          "file": "pixChicago_scaled.ttf",
+          "file": "pixChicago_mono.ttf",
           "characterRegex": "[0-9:]"
         },
         {
           "type": "font",
           "name": "PIX_CHICAGO_45",
-          "file": "pixChicago_scaled.ttf",
+          "file": "pixChicago_mono.ttf",
           "characterRegex": "[0-9:]"
         }
       ]
