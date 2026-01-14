@@ -1,0 +1,68 @@
+{
+  "name": "HappyMac",
+  "author": "MakeAwesomeHappen",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "HappyMac",
+    "uuid": "6238f831-fd1f-4054-ba91-4067f7cf8494",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite",
+      "emery",
+      "flint"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "messageKeys": [
+      "dummy"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "font",
+          "name": "PIX_CHICAGO_18",
+          "file": "pixChicago_scaled.ttf",
+          "characterRegex": "[A-Z0-9 :]"
+        },
+        {
+          "type": "font",
+          "name": "PIX_CHICAGO_20",
+          "file": "pixChicago_scaled.ttf",
+          "characterRegex": "[A-Z0-9 :]"
+        },
+        {
+          "type": "font",
+          "name": "PIX_CHICAGO_27",
+          "file": "pixChicago_scaled.ttf",
+          "characterRegex": "[0-9:]"
+        },
+        {
+          "type": "font",
+          "name": "PIX_CHICAGO_36",
+          "file": "pixChicago_scaled.ttf",
+          "characterRegex": "[0-9:]"
+        },
+        {
+          "type": "font",
+          "name": "PIX_CHICAGO_38",
+          "file": "pixChicago_scaled.ttf",
+          "characterRegex": "[0-9:]"
+        },
+        {
+          "type": "font",
+          "name": "PIX_CHICAGO_45",
+          "file": "pixChicago_scaled.ttf",
+          "characterRegex": "[0-9:]"
+        }
+      ]
+    }
+  }
+}
