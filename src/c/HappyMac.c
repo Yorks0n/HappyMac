@@ -5,6 +5,7 @@ static Window *s_window;
 static TextLayer *s_date_layer;
 static TextLayer *s_time_layer;
 static Layer *s_line_layer;
+static Layer *s_corner_line_layer;
 static Layer *s_matrix_layer;
 static Layer *s_battery_layer;
 static GFont s_date_font;
@@ -163,8 +164,12 @@ static void prv_window_load(Window *window) {
   s_line_layer = layer_create(GRect(0, line_y, bounds.size.w, 2));
   layer_set_update_proc(s_line_layer, line_layer_update_proc);
   layer_add_child(window_layer, s_line_layer);
+  s_corner_line_layer = layer_create(GRect(4, line_y / 2, 12, 2));
+  layer_set_update_proc(s_corner_line_layer, line_layer_update_proc);
+  layer_add_child(window_layer, s_corner_line_layer);
 #ifdef PBL_ROUND
   layer_set_hidden(s_line_layer, true);
+  layer_set_hidden(s_corner_line_layer, true);
 #endif
 
   s_matrix_layer = layer_create(bounds);
@@ -198,6 +203,7 @@ static void prv_window_unload(Window *window) {
   fonts_unload_custom_font(s_date_font);
   fonts_unload_custom_font(s_time_font);
   layer_destroy(s_line_layer);
+  layer_destroy(s_corner_line_layer);
   layer_destroy(s_matrix_layer);
   layer_destroy(s_battery_layer);
 }
