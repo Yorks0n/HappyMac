@@ -51,7 +51,11 @@ static void update_time() {
 
   static char s_buffer[16];
   static char s_time_buffer[8];
+#ifdef PBL_ROUND
+  strftime(s_buffer, sizeof(s_buffer), "%b %d", tick_time);
+#else
   strftime(s_buffer, sizeof(s_buffer), "%b %d %a", tick_time);
+#endif
   strftime(s_time_buffer, sizeof(s_time_buffer), "%H:%M", tick_time);
 
   for (char *p = s_buffer; *p; ++p) {
@@ -138,9 +142,14 @@ static void prv_window_load(Window *window) {
   const int time_height = is_small_screen ? 44 : 52;
   const int time_center_y = (bounds.size.h * 3) / 4;
   const int time_y = time_center_y - (time_height / 2);
-  const int date_y = is_small_screen
-      ? bounds.size.h - date_height - 2
-      : (bounds.size.h * 9) / 10 - (date_height / 2);
+  const int date_y =
+#ifdef PBL_ROUND
+      (bounds.size.h / 10) - (date_height / 2);
+#else
+      is_small_screen
+          ? bounds.size.h - date_height - 2
+          : (bounds.size.h * 9) / 10 - (date_height / 2);
+#endif
 
   s_date_layer = text_layer_create(GRect(2, date_y, bounds.size.w - 4, date_height));
   text_layer_set_background_color(s_date_layer, GColorClear);
@@ -154,6 +163,9 @@ static void prv_window_load(Window *window) {
   s_line_layer = layer_create(GRect(0, line_y, bounds.size.w, 2));
   layer_set_update_proc(s_line_layer, line_layer_update_proc);
   layer_add_child(window_layer, s_line_layer);
+#ifdef PBL_ROUND
+  layer_set_hidden(s_line_layer, true);
+#endif
 
   s_matrix_layer = layer_create(bounds);
   layer_set_update_proc(s_matrix_layer, matrix_layer_update_proc);
