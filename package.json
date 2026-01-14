@@ -24,6 +24,9 @@
     "messageKeys": [
       "theme"
     ],
+    "capabilities": [
+      "configurable"
+    ],
     "resources": {
       "media": [
         {

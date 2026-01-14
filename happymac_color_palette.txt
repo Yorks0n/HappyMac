@@ -1,8 +1,0 @@
-1,GColorBlack
-2,GColorOxfordBlue
-3,GColorRed
-4,GColorDarkGray
-5,GColorIslamicGreen
-6,GColorLightGray
-7,GColorBabyBlueEyes
-8,GColorWhite

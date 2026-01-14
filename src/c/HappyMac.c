@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "message_keys.auto.h"
 
 static Window *s_window;
@@ -22,7 +23,7 @@ enum {
   THEME_COLOR = 2,
 };
 
-static const int DEFAULT_THEME = THEME_COLOR;
+static const int DEFAULT_THEME = THEME_LIGHT;
 
 enum {
   PERSIST_KEY_THEME = 1,
@@ -64,6 +65,41 @@ static const uint8_t s_matrix[32][31] = {
   {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
 };
 
+static const uint8_t s_color_matrix[32][25] = {
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {1, 6, 6, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 2, 7, 7, 7, 2, 7, 7, 7, 2, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 2, 7, 7, 7, 2, 7, 7, 7, 2, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 2, 2, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 2, 2, 2, 2, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 4, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 6, 6, 1},
+  {1, 6, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 6, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {1, 6, 6, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 1},
+  {1, 6, 6, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 8, 8, 8, 8, 8, 8, 8, 8, 6, 6, 6, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 1},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+  {0, 1, 6, 6, 6, 6, 6, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+  {0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+  {0, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 0},
+  {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+};
+
 static void update_time() {
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
@@ -85,6 +121,29 @@ static void update_time() {
   text_layer_set_text(s_time_layer, s_time_buffer);
 }
 
+static GColor color_from_index(uint8_t index) {
+  switch (index) {
+    case 1:
+      return GColorBlack;
+    case 2:
+      return GColorOxfordBlue;
+    case 3:
+      return GColorRed;
+    case 4:
+      return GColorDarkGray;
+    case 5:
+      return GColorIslamicGreen;
+    case 6:
+      return GColorLightGray;
+    case 7:
+      return GColorBabyBlueEyes;
+    case 8:
+      return GColorWhite;
+    default:
+      return GColorBlack;
+  }
+}
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
 }
@@ -98,15 +157,26 @@ static void line_layer_update_proc(Layer *layer, GContext *ctx) {
 static void matrix_layer_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   const int pixel_size = bounds.size.w < 190 ? 2 : 3;
-  const int matrix_width = 31 * pixel_size;
+  const int matrix_cols = (s_theme == THEME_COLOR) ? 25 : 31;
+  const int matrix_width = matrix_cols * pixel_size;
   const int matrix_height = 32 * pixel_size;
   const int origin_x = (bounds.size.w - matrix_width) / 2;
   const int origin_y = (bounds.size.h * 2 / 5) - (matrix_height / 2);
 
-  graphics_context_set_fill_color(ctx, s_foreground_color);
   for (int row = 0; row < 32; ++row) {
-    for (int col = 0; col < 31; ++col) {
-      if (s_matrix[row][col] == 1) {
+    for (int col = 0; col < matrix_cols; ++col) {
+      if (s_theme == THEME_COLOR) {
+        const uint8_t color_index = s_color_matrix[row][col];
+        if (color_index == 0) {
+          continue;
+        }
+        graphics_context_set_fill_color(ctx, color_from_index(color_index));
+        graphics_fill_rect(ctx,
+                           GRect(origin_x + col * pixel_size, origin_y + row * pixel_size,
+                                 pixel_size, pixel_size),
+                           0, GCornerNone);
+      } else if (s_matrix[row][col] == 1) {
+        graphics_context_set_fill_color(ctx, s_foreground_color);
         graphics_fill_rect(ctx,
                            GRect(origin_x + col * pixel_size, origin_y + row * pixel_size,
                                  pixel_size, pixel_size),
@@ -157,13 +227,8 @@ static void apply_theme(void) {
       s_foreground_color = GColorWhite;
       break;
     case THEME_COLOR:
-#ifdef PBL_COLOR
-      s_background_color = GColorPastelYellow;
-      s_foreground_color = GColorBlack;
-#else
       s_background_color = GColorWhite;
       s_foreground_color = GColorBlack;
-#endif
       break;
     case THEME_LIGHT:
     default:
@@ -193,12 +258,33 @@ static void apply_theme(void) {
   }
 }
 
+static void send_theme_to_phone(void) {
+  DictionaryIterator *iter = NULL;
+  if (app_message_outbox_begin(&iter) != APP_MSG_OK || !iter) {
+    return;
+  }
+  dict_write_int(iter, MESSAGE_KEY_theme, &s_theme, sizeof(s_theme), true);
+  app_message_outbox_send();
+}
+
 static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *theme_tuple = dict_find(iter, MESSAGE_KEY_theme);
   if (theme_tuple) {
-    s_theme = (int)theme_tuple->value->int32;
-    persist_write_int(PERSIST_KEY_THEME, s_theme);
-    apply_theme();
+    int new_theme = s_theme;
+    if (theme_tuple->type == TUPLE_CSTRING) {
+      new_theme = atoi(theme_tuple->value->cstring);
+    } else if (theme_tuple->type == TUPLE_UINT) {
+      new_theme = (int)theme_tuple->value->uint32;
+    } else {
+      new_theme = (int)theme_tuple->value->int32;
+    }
+
+    if (new_theme >= THEME_LIGHT && new_theme <= THEME_COLOR) {
+      s_theme = new_theme;
+      persist_write_int(PERSIST_KEY_THEME, s_theme);
+      apply_theme();
+      send_theme_to_phone();
+    }
   }
 }
 
@@ -296,6 +382,7 @@ static void prv_init(void) {
 
   app_message_register_inbox_received(inbox_received_handler);
   app_message_open(64, 64);
+  send_theme_to_phone();
 
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   battery_handler(battery_state_service_peek());
