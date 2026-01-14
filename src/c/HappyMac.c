@@ -108,8 +108,8 @@ static void battery_layer_update_proc(Layer *layer, GContext *ctx) {
 
   const int segment_count = 4;
   const int segment_gap = 1;
-  const int inner_width = body.size.w - 2;
-  const int inner_height = body.size.h - 2;
+  const int inner_width = body.size.w - 4;
+  const int inner_height = body.size.h - 4;
   const int segment_width = (inner_width - (segment_gap * (segment_count - 1))) / segment_count;
   const int filled_segments = (s_battery_state.charge_percent * segment_count + 99) / 100;
 
@@ -118,8 +118,8 @@ static void battery_layer_update_proc(Layer *layer, GContext *ctx) {
     if (i >= filled_segments) {
       break;
     }
-    const int x = body.origin.x + 1 + i * (segment_width + segment_gap);
-    const int y = body.origin.y + 1;
+    const int x = body.origin.x + 2 + i * (segment_width + segment_gap);
+    const int y = body.origin.y + 2;
     graphics_fill_rect(ctx, GRect(x, y, segment_width, inner_height), 0, GCornerNone);
   }
 }
@@ -182,8 +182,9 @@ static void prv_window_load(Window *window) {
 
   const int battery_width = 26;
   const int battery_height = 10;
-  const int battery_x = bounds.size.w - battery_width - 2;
-  const int battery_y = 7;
+  const int battery_margin = (line_y - battery_height) / 2;
+  const int battery_x = bounds.size.w - battery_width - battery_margin;
+  const int battery_y = battery_margin;
   s_battery_layer = layer_create(GRect(battery_x, battery_y, battery_width, battery_height));
   layer_set_update_proc(s_battery_layer, battery_layer_update_proc);
   layer_add_child(window_layer, s_battery_layer);
