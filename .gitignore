@@ -9,6 +9,15 @@ build/
 # Node dependencies (if installed)
 node_modules/
 
+# Node logs
+npm-debug.log*
+yarn-error.log*
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
+
 # agent
 AGENT.md
 CLAUDE.md
