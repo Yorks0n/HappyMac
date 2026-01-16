@@ -1,8 +1,8 @@
 {
   "name": "HappyMac",
-  "author": "MakeAwesomeHappen",
-  "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "author": "Yorks0n",
+  "version": "1.1.0",
+  "keywords": ["Mac","Macintosh","happy"],
   "private": true,
   "dependencies": {},
   "pebble": {
@@ -22,10 +22,17 @@
       "watchface": true
     },
     "messageKeys": [
-      "theme"
+      "theme",
+      "WEATHER_ENABLED",
+      "WEATHER_SHOW_TEMP",
+      "WEATHER_TEMP_UNIT",
+      "WEATHER_TEMP",
+      "WEATHER_CODE",
+      "WEATHER_REQUEST"
     ],
     "capabilities": [
-      "configurable"
+      "configurable",
+      "location"
     ],
     "resources": {
       "media": [
@@ -46,6 +53,96 @@
           "name": "PIX_CHICAGO_45",
           "file": "pixChicago_mono.ttf",
           "characterRegex": "[0-9:]"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_1",
+          "file": "weather_icon_light/weather_17x17_openmetro_light1.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_2",
+          "file": "weather_icon_light/weather_17x17_openmetro_light2.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_3",
+          "file": "weather_icon_light/weather_17x17_openmetro_light3.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_4",
+          "file": "weather_icon_light/weather_17x17_openmetro_light4.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_5",
+          "file": "weather_icon_light/weather_17x17_openmetro_light5.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_6",
+          "file": "weather_icon_light/weather_17x17_openmetro_light6.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_7",
+          "file": "weather_icon_light/weather_17x17_openmetro_light7.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_8",
+          "file": "weather_icon_light/weather_17x17_openmetro_light8.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_LIGHT_9",
+          "file": "weather_icon_light/weather_17x17_openmetro_light9.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_1",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark1.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_2",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark2.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_3",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark3.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_4",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark4.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_5",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark5.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_6",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark6.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_7",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark7.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_8",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark8.png"
+        },
+        {
+          "type": "png",
+          "name": "WEATHER_DARK_9",
+          "file": "weather_icon_dark/weather_17x17_openmetro_dark9.png"
         }
       ]
     }
