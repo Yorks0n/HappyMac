@@ -28,7 +28,8 @@
       "WEATHER_TEMP_UNIT",
       "WEATHER_TEMP",
       "WEATHER_CODE",
-      "WEATHER_REQUEST"
+      "WEATHER_REQUEST",
+      "SETTINGS_REQUEST"
     ],
     "capabilities": [
       "configurable",

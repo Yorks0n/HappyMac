@@ -413,7 +413,7 @@ static void update_weather_layout(void) {
   const int temp_width = 50;
   const int temp_height = 16;
   const int icon_y = bounds.size.h - WEATHER_ICON_SIZE - 10;
-  const int temp_y = icon_y + ((WEATHER_ICON_SIZE - temp_height) / 2);
+  const int temp_y = icon_y + ((WEATHER_ICON_SIZE - temp_height) / 2) - 1;
   const int center_x = bounds.size.w / 2;
 
   if (s_weather_enabled && s_weather_show_temp) {
@@ -607,6 +607,11 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     s_weather_retry_count = 0;
     update_weather_icon();
     APP_LOG(APP_LOG_LEVEL_INFO, "weather code=%u", s_weather_code);
+  }
+
+  Tuple *settings_request_tuple = dict_find(iter, MESSAGE_KEY_SETTINGS_REQUEST);
+  if (settings_request_tuple) {
+    send_settings_to_phone();
   }
 
   if (weather_settings_changed) {

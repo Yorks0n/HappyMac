@@ -64,6 +64,10 @@ var clayConfig = [
 
 var clay = new Clay(clayConfig);
 
+Pebble.addEventListener('showConfiguration', function() {
+  Pebble.sendAppMessage({ SETTINGS_REQUEST: 1 });
+});
+
 function fetch(url, onResponse, onError) {
   var xhr = new XMLHttpRequest();
   xhr.onload = function() {
@@ -127,13 +131,14 @@ Pebble.addEventListener('appmessage', function(e) {
     clay.setSettings({ theme: e.payload.theme });
   }
   if (typeof e.payload.WEATHER_ENABLED !== 'undefined') {
-    clay.setSettings({ WEATHER_ENABLED: e.payload.WEATHER_ENABLED });
+    clay.setSettings({ WEATHER_ENABLED: !!e.payload.WEATHER_ENABLED });
   }
   if (typeof e.payload.WEATHER_SHOW_TEMP !== 'undefined') {
-    clay.setSettings({ WEATHER_SHOW_TEMP: e.payload.WEATHER_SHOW_TEMP });
+    clay.setSettings({ WEATHER_SHOW_TEMP: !!e.payload.WEATHER_SHOW_TEMP });
   }
   if (typeof e.payload.WEATHER_TEMP_UNIT !== 'undefined') {
-    clay.setSettings({ WEATHER_TEMP_UNIT: e.payload.WEATHER_TEMP_UNIT });
+    var unit = e.payload.WEATHER_TEMP_UNIT === 1 ? 'F' : 'C';
+    clay.setSettings({ WEATHER_TEMP_UNIT: unit });
   }
   if (typeof e.payload.WEATHER_REQUEST !== 'undefined') {
     weatherGet(e.payload.WEATHER_REQUEST);
