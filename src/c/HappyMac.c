@@ -675,6 +675,9 @@ static void prv_window_load(Window *window) {
 
   const int temp_x = icon_x + WEATHER_ICON_SIZE + 2;
   int temp_y = icon_y;
+#ifndef PBL_ROUND
+  temp_y = icon_y - 1;
+#endif
   s_weather_temp_layer = text_layer_create(GRect(temp_x, temp_y, 50, 16));
   text_layer_set_background_color(s_weather_temp_layer, GColorClear);
   text_layer_set_text_color(s_weather_temp_layer, GColorBlack);
