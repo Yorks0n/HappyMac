@@ -320,12 +320,12 @@ static void battery_handler(BatteryChargeState state) {
 static void connection_handler(bool connected) {
   s_bt_connected = connected;
   if (connected) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "bluetooth connected, request weather");
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "bluetooth connected, request weather"); */
     s_last_weather = 0;
     s_weather_retry_count = 0;
     request_weather();
   } else {
-    APP_LOG(APP_LOG_LEVEL_INFO, "bluetooth disconnected");
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "bluetooth disconnected"); */
   }
 }
 
@@ -474,30 +474,30 @@ static void update_weather_temp_text(void) {
 
 static void request_weather(void) {
   if (!s_weather_enabled) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "weather request skipped: disabled");
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "weather request skipped: disabled"); */
     return;
   }
   if (!s_bt_connected) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "weather request skipped: disconnected");
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "weather request skipped: disconnected"); */
     return;
   }
 
   const time_t now = time(NULL);
   if (s_last_weather != 0 && s_last_weather + WEATHER_INTERVAL > now) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "weather request skipped: throttled");
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "weather request skipped: throttled"); */
     return;
   }
   if (s_weather_retry_count >= 10) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "weather request skipped: retry limit");
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "weather request skipped: retry limit"); */
     return;
   }
 
   DictionaryIterator *iter = NULL;
   if (app_message_outbox_begin(&iter) != APP_MSG_OK || !iter) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "weather request: outbox begin failed");
+    /* APP_LOG(APP_LOG_LEVEL_ERROR, "weather request: outbox begin failed"); */
     return;
   }
-  APP_LOG(APP_LOG_LEVEL_INFO, "weather request unit=%u", s_weather_unit);
+  /* APP_LOG(APP_LOG_LEVEL_INFO, "weather request unit=%u", s_weather_unit); */
   dict_write_uint8(iter, MESSAGE_KEY_WEATHER_REQUEST, s_weather_unit);
   app_message_outbox_send();
   s_weather_retry_count++;
@@ -547,7 +547,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   if (weather_enabled_tuple) {
     s_weather_enabled = tuple_value_to_bool(weather_enabled_tuple, s_weather_enabled);
     persist_write_bool(PERSIST_KEY_WEATHER_ENABLED, s_weather_enabled);
-    APP_LOG(APP_LOG_LEVEL_INFO, "weather enabled=%d", s_weather_enabled);
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "weather enabled=%d", s_weather_enabled); */
     send_settings_to_phone();
     weather_settings_changed = true;
   }
@@ -556,7 +556,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   if (weather_show_temp_tuple) {
     s_weather_show_temp = tuple_value_to_bool(weather_show_temp_tuple, s_weather_show_temp);
     persist_write_bool(PERSIST_KEY_WEATHER_SHOW_TEMP, s_weather_show_temp);
-    APP_LOG(APP_LOG_LEVEL_INFO, "weather show_temp=%d", s_weather_show_temp);
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "weather show_temp=%d", s_weather_show_temp); */
     send_settings_to_phone();
     weather_settings_changed = true;
   }
@@ -574,7 +574,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     if (unit != s_weather_unit) {
       s_weather_unit = unit;
       persist_write_int(PERSIST_KEY_WEATHER_UNIT, s_weather_unit);
-      APP_LOG(APP_LOG_LEVEL_INFO, "weather unit=%u", s_weather_unit);
+      /* APP_LOG(APP_LOG_LEVEL_INFO, "weather unit=%u", s_weather_unit); */
       send_settings_to_phone();
       weather_settings_changed = true;
       weather_unit_changed = true;
@@ -592,7 +592,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     s_last_weather = time(NULL);
     s_weather_retry_count = 0;
     update_weather_temp_text();
-    APP_LOG(APP_LOG_LEVEL_INFO, "weather temp=%d", s_weather_temp);
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "weather temp=%d", s_weather_temp); */
   }
 
   Tuple *weather_code_tuple = dict_find(iter, MESSAGE_KEY_WEATHER_CODE);
@@ -606,7 +606,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     s_last_weather = time(NULL);
     s_weather_retry_count = 0;
     update_weather_icon();
-    APP_LOG(APP_LOG_LEVEL_INFO, "weather code=%u", s_weather_code);
+    /* APP_LOG(APP_LOG_LEVEL_INFO, "weather code=%u", s_weather_code); */
   }
 
   Tuple *settings_request_tuple = dict_find(iter, MESSAGE_KEY_SETTINGS_REQUEST);
