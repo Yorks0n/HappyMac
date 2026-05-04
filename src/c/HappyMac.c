@@ -37,7 +37,16 @@ enum {
   THEME_COLOR = 2,
 };
 
-static const int DEFAULT_THEME = THEME_LIGHT;
+#ifndef HAPPYMAC_SCREENSHOT_THEME
+#define HAPPYMAC_SCREENSHOT_THEME -1
+#endif
+
+static const int DEFAULT_THEME =
+#if HAPPYMAC_SCREENSHOT_THEME >= 0
+    HAPPYMAC_SCREENSHOT_THEME;
+#else
+    THEME_LIGHT;
+#endif
 
 enum {
   PERSIST_KEY_THEME = 1,
@@ -334,11 +343,15 @@ static void update_bluetooth_visibility(void) {
     return;
   }
 
+#ifdef PBL_ROUND
+  layer_set_hidden(s_bt_layer, true);
+#else
   const bool should_show = s_bt_status_enabled && s_bt_connected;
   layer_set_hidden(s_bt_layer, !should_show);
   if (should_show) {
     layer_mark_dirty(s_bt_layer);
   }
+#endif
 }
 
 static void battery_handler(BatteryChargeState state) {
@@ -789,9 +802,11 @@ static void prv_window_unload(Window *window) {
 
 static void prv_init(void) {
   s_theme = DEFAULT_THEME;
+#if HAPPYMAC_SCREENSHOT_THEME < 0
   if (persist_exists(PERSIST_KEY_THEME)) {
     s_theme = persist_read_int(PERSIST_KEY_THEME);
   }
+#endif
   if (persist_exists(PERSIST_KEY_WEATHER_ENABLED)) {
     s_weather_enabled = persist_read_bool(PERSIST_KEY_WEATHER_ENABLED);
   }

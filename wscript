@@ -4,6 +4,7 @@
 # Feel free to customize this to your needs.
 #
 import os.path
+import os
 
 top = '.'
 out = 'build'
@@ -32,6 +33,9 @@ def build(ctx):
     cached_env = ctx.env
     for platform in ctx.env.TARGET_PLATFORMS:
         ctx.env = ctx.all_envs[platform]
+        screenshot_theme = os.environ.get('HAPPYMAC_SCREENSHOT_THEME')
+        if screenshot_theme is not None:
+            ctx.env.append_value('CFLAGS', ['-DHAPPYMAC_SCREENSHOT_THEME={}'.format(screenshot_theme)])
         ctx.set_group(ctx.env.PLATFORM_NAME)
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=app_elf, bin_type='app')
