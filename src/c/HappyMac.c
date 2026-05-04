@@ -315,24 +315,18 @@ static void battery_layer_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void bluetooth_layer_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
-  const int center_x = bounds.size.w / 2;
-  const int top_y = 1;
-  const int mid_y = bounds.size.h / 2;
-  const int bottom_y = bounds.size.h - 2;
-  const int right_x = bounds.size.w - 2;
-  const int left_x = 1;
+  const GRect body = GRect(2, 1, 8, 14);
+  const GRect screen = GRect(3, 3, 6, 9);
+  const GRect speaker = GRect(5, 2, 2, 1);
+  const GRect home = GRect(5, 13, 2, 1);
 
-  graphics_context_set_stroke_color(ctx, s_foreground_color);
-  graphics_context_set_stroke_width(ctx, 2);
+  graphics_context_set_fill_color(ctx, s_foreground_color);
+  graphics_fill_rect(ctx, body, 0, GCornerNone);
 
-  graphics_draw_line(ctx, GPoint(center_x, top_y), GPoint(center_x, bottom_y));
-  graphics_draw_line(ctx, GPoint(center_x, top_y), GPoint(right_x, mid_y - 3));
-  graphics_draw_line(ctx, GPoint(right_x, mid_y - 3), GPoint(center_x, mid_y));
-  graphics_draw_line(ctx, GPoint(center_x, mid_y), GPoint(right_x, mid_y + 3));
-  graphics_draw_line(ctx, GPoint(right_x, mid_y + 3), GPoint(center_x, bottom_y));
-  graphics_draw_line(ctx, GPoint(left_x, mid_y - 4), GPoint(center_x, mid_y));
-  graphics_draw_line(ctx, GPoint(center_x, mid_y), GPoint(left_x, mid_y + 4));
+  graphics_context_set_fill_color(ctx, s_background_color);
+  graphics_fill_rect(ctx, screen, 0, GCornerNone);
+  graphics_fill_rect(ctx, speaker, 0, GCornerNone);
+  graphics_fill_rect(ctx, home, 0, GCornerNone);
 }
 
 static void update_bluetooth_visibility(void) {
