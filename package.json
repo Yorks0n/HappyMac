@@ -29,7 +29,8 @@
       "WEATHER_TEMP",
       "WEATHER_CODE",
       "WEATHER_REQUEST",
-      "SETTINGS_REQUEST"
+      "SETTINGS_REQUEST",
+      "BT_STATUS_ENABLED"
     ],
     "capabilities": [
       "configurable",

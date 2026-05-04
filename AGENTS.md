@@ -15,6 +15,7 @@ The app targets multiple Pebble watch models:
 - diorite (Pebble 2)
 - emery (Pebble Time 2)
 - flint (Pebble 2 Duo)
+- gabbro (Pebble Time Round 2)
 
 ## Commands
 

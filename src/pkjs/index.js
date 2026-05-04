@@ -10,6 +10,21 @@ var clayConfig = [
     items: [
       {
         type: 'heading',
+        defaultValue: 'Connection'
+      },
+      {
+        type: 'toggle',
+        messageKey: 'BT_STATUS_ENABLED',
+        label: 'Show connection status',
+        defaultValue: true
+      }
+    ]
+  },
+  {
+    type: 'section',
+    items: [
+      {
+        type: 'heading',
         defaultValue: 'Theme'
       },
       {
@@ -62,10 +77,51 @@ var clayConfig = [
   }
 ];
 
-var clay = new Clay(clayConfig);
+var clay = new Clay(clayConfig, null, { autoHandleEvents: false });
+var configurationOpenPending = false;
+var configurationOpenTimer = null;
+
+function openConfiguration() {
+  if (configurationOpenTimer) {
+    clearTimeout(configurationOpenTimer);
+    configurationOpenTimer = null;
+  }
+  if (!configurationOpenPending) {
+    return;
+  }
+
+  configurationOpenPending = false;
+  Pebble.openURL(clay.generateUrl());
+}
 
 Pebble.addEventListener('showConfiguration', function() {
-  Pebble.sendAppMessage({ SETTINGS_REQUEST: 1 });
+  configurationOpenPending = true;
+  Pebble.sendAppMessage(
+    { SETTINGS_REQUEST: 1 },
+    function() {
+      configurationOpenTimer = setTimeout(openConfiguration, 3000);
+    },
+    function() {
+      openConfiguration();
+    }
+  );
+});
+
+Pebble.addEventListener('webviewclosed', function(e) {
+  if (!e || !e.response) {
+    return;
+  }
+
+  var settings = clay.getSettings(e.response);
+  Pebble.sendAppMessage(
+    settings,
+    function() {
+      console.log('Sent config data to Pebble');
+    },
+    function(error) {
+      console.log('Failed to send config data!', JSON.stringify(error));
+    }
+  );
 });
 
 function fetch(url, onResponse, onError) {
@@ -139,6 +195,17 @@ Pebble.addEventListener('appmessage', function(e) {
   if (typeof e.payload.WEATHER_TEMP_UNIT !== 'undefined') {
     var unit = e.payload.WEATHER_TEMP_UNIT === 1 ? 'F' : 'C';
     clay.setSettings({ WEATHER_TEMP_UNIT: unit });
+  }
+  if (typeof e.payload.BT_STATUS_ENABLED !== 'undefined') {
+    clay.setSettings({ BT_STATUS_ENABLED: !!e.payload.BT_STATUS_ENABLED });
+  }
+  if (configurationOpenPending &&
+      typeof e.payload.theme !== 'undefined' &&
+      typeof e.payload.WEATHER_ENABLED !== 'undefined' &&
+      typeof e.payload.WEATHER_SHOW_TEMP !== 'undefined' &&
+      typeof e.payload.WEATHER_TEMP_UNIT !== 'undefined' &&
+      typeof e.payload.BT_STATUS_ENABLED !== 'undefined') {
+    openConfiguration();
   }
   if (typeof e.payload.WEATHER_REQUEST !== 'undefined') {
     weatherGet(e.payload.WEATHER_REQUEST);

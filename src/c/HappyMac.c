@@ -10,6 +10,7 @@ static TextLayer *s_time_layer;
 static Layer *s_line_layer;
 static Layer *s_corner_line_layer;
 static Layer *s_matrix_layer;
+static Layer *s_bt_layer;
 static Layer *s_battery_layer;
 static BitmapLayer *s_weather_icon_layer;
 static TextLayer *s_weather_temp_layer;
@@ -21,6 +22,7 @@ static GColor s_foreground_color;
 static GColor s_background_color;
 static int s_theme;
 static bool s_bt_connected = false;
+static bool s_bt_status_enabled = true;
 static bool s_weather_enabled = true;
 static bool s_weather_show_temp = true;
 static uint8_t s_weather_unit = 0;
@@ -44,9 +46,11 @@ enum {
   PERSIST_KEY_WEATHER_UNIT = 4,
   PERSIST_KEY_WEATHER_TEMP = 5,
   PERSIST_KEY_WEATHER_CODE = 6,
+  PERSIST_KEY_BT_STATUS_ENABLED = 7,
 };
 
 static void apply_theme(void);
+static void update_bluetooth_visibility(void);
 static void update_weather_visibility(void);
 static void update_weather_icon(void);
 static void update_weather_temp_text(void);
@@ -310,6 +314,39 @@ static void battery_layer_update_proc(Layer *layer, GContext *ctx) {
   }
 }
 
+static void bluetooth_layer_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  const int center_x = bounds.size.w / 2;
+  const int top_y = 1;
+  const int mid_y = bounds.size.h / 2;
+  const int bottom_y = bounds.size.h - 2;
+  const int right_x = bounds.size.w - 2;
+  const int left_x = 1;
+
+  graphics_context_set_stroke_color(ctx, s_foreground_color);
+  graphics_context_set_stroke_width(ctx, 2);
+
+  graphics_draw_line(ctx, GPoint(center_x, top_y), GPoint(center_x, bottom_y));
+  graphics_draw_line(ctx, GPoint(center_x, top_y), GPoint(right_x, mid_y - 3));
+  graphics_draw_line(ctx, GPoint(right_x, mid_y - 3), GPoint(center_x, mid_y));
+  graphics_draw_line(ctx, GPoint(center_x, mid_y), GPoint(right_x, mid_y + 3));
+  graphics_draw_line(ctx, GPoint(right_x, mid_y + 3), GPoint(center_x, bottom_y));
+  graphics_draw_line(ctx, GPoint(left_x, mid_y - 4), GPoint(center_x, mid_y));
+  graphics_draw_line(ctx, GPoint(center_x, mid_y), GPoint(left_x, mid_y + 4));
+}
+
+static void update_bluetooth_visibility(void) {
+  if (!s_bt_layer) {
+    return;
+  }
+
+  const bool should_show = s_bt_status_enabled && s_bt_connected;
+  layer_set_hidden(s_bt_layer, !should_show);
+  if (should_show) {
+    layer_mark_dirty(s_bt_layer);
+  }
+}
+
 static void battery_handler(BatteryChargeState state) {
   s_battery_state = state;
   if (s_battery_layer) {
@@ -319,6 +356,7 @@ static void battery_handler(BatteryChargeState state) {
 
 static void connection_handler(bool connected) {
   s_bt_connected = connected;
+  update_bluetooth_visibility();
   if (connected) {
     /* APP_LOG(APP_LOG_LEVEL_INFO, "bluetooth connected, request weather"); */
     s_last_weather = 0;
@@ -362,6 +400,9 @@ static void apply_theme(void) {
   if (s_matrix_layer) {
     layer_mark_dirty(s_matrix_layer);
   }
+  if (s_bt_layer) {
+    layer_mark_dirty(s_bt_layer);
+  }
   if (s_battery_layer) {
     layer_mark_dirty(s_battery_layer);
   }
@@ -380,6 +421,7 @@ static void send_settings_to_phone(void) {
   dict_write_uint8(iter, MESSAGE_KEY_WEATHER_ENABLED, s_weather_enabled ? 1 : 0);
   dict_write_uint8(iter, MESSAGE_KEY_WEATHER_SHOW_TEMP, s_weather_show_temp ? 1 : 0);
   dict_write_uint8(iter, MESSAGE_KEY_WEATHER_TEMP_UNIT, s_weather_unit);
+  dict_write_uint8(iter, MESSAGE_KEY_BT_STATUS_ENABLED, s_bt_status_enabled ? 1 : 0);
   app_message_outbox_send();
 }
 
@@ -581,6 +623,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     }
   }
 
+  Tuple *bt_status_enabled_tuple = dict_find(iter, MESSAGE_KEY_BT_STATUS_ENABLED);
+  if (bt_status_enabled_tuple) {
+    s_bt_status_enabled = tuple_value_to_bool(bt_status_enabled_tuple, s_bt_status_enabled);
+    persist_write_bool(PERSIST_KEY_BT_STATUS_ENABLED, s_bt_status_enabled);
+    update_bluetooth_visibility();
+    send_settings_to_phone();
+  }
+
   Tuple *weather_temp_tuple = dict_find(iter, MESSAGE_KEY_WEATHER_TEMP);
   if (weather_temp_tuple) {
     if (weather_temp_tuple->type == TUPLE_INT) {
@@ -703,11 +753,22 @@ static void prv_window_load(Window *window) {
   const int battery_margin = (line_y - battery_height) / 2;
   const int battery_x = bounds.size.w - battery_width - battery_margin;
   const int battery_y = battery_margin;
+  const int bt_width = 12;
+  const int bt_height = 16;
+  const int bt_gap = 5;
+  const int bt_x = battery_x - bt_gap - bt_width;
+  const int bt_y = (line_y - bt_height) / 2;
+  s_bt_layer = layer_create(GRect(bt_x, bt_y, bt_width, bt_height));
+  layer_set_update_proc(s_bt_layer, bluetooth_layer_update_proc);
+  layer_set_hidden(s_bt_layer, true);
+  layer_add_child(window_layer, s_bt_layer);
+
   s_battery_layer = layer_create(GRect(battery_x, battery_y, battery_width, battery_height));
   layer_set_update_proc(s_battery_layer, battery_layer_update_proc);
   layer_add_child(window_layer, s_battery_layer);
 
   apply_theme();
+  update_bluetooth_visibility();
   update_weather_visibility();
   update_weather_layout();
   update_weather_temp_text();
@@ -722,6 +783,7 @@ static void prv_window_unload(Window *window) {
   layer_destroy(s_line_layer);
   layer_destroy(s_corner_line_layer);
   layer_destroy(s_matrix_layer);
+  layer_destroy(s_bt_layer);
   layer_destroy(s_battery_layer);
   if (s_weather_icon_bitmap) {
     gbitmap_destroy(s_weather_icon_bitmap);
@@ -751,6 +813,9 @@ static void prv_init(void) {
   if (persist_exists(PERSIST_KEY_WEATHER_CODE)) {
     s_weather_code = (uint8_t)persist_read_int(PERSIST_KEY_WEATHER_CODE);
   }
+  if (persist_exists(PERSIST_KEY_BT_STATUS_ENABLED)) {
+    s_bt_status_enabled = persist_read_bool(PERSIST_KEY_BT_STATUS_ENABLED);
+  }
 
   s_window = window_create();
   window_set_window_handlers(s_window, (WindowHandlers) {
@@ -758,12 +823,13 @@ static void prv_init(void) {
     .unload = prv_window_unload,
   });
 
+  s_bt_connected = bluetooth_connection_service_peek();
+
   const bool animated = true;
   window_stack_push(s_window, animated);
 
   app_message_register_inbox_received(inbox_received_handler);
   app_message_open(64, 64);
-  s_bt_connected = bluetooth_connection_service_peek();
   bluetooth_connection_service_subscribe(connection_handler);
   send_settings_to_phone();
   request_weather();
