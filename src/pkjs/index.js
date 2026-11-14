@@ -25,6 +25,35 @@ var clayConfig = [
     items: [
       {
         type: 'heading',
+        defaultValue: 'Hour Mode'
+      },
+      {
+          "type": "select",
+          "messageKey": "HOUR_MODE",
+          "defaultValue": 0,
+          "label": "Hour Mode",
+          "options": [
+            {
+              "label": "System Default",
+              "value": 0
+            },
+            { 
+              "label": "12-Hour", 
+              "value": 1
+            },
+            { 
+              "label": "24-Hour",
+              "value": 2
+            }
+          ]
+        },
+    ]
+  },
+  {
+    type: 'section',
+    items: [
+      {
+        type: 'heading',
         defaultValue: 'Theme'
       },
       {
@@ -199,12 +228,16 @@ Pebble.addEventListener('appmessage', function(e) {
   if (typeof e.payload.BT_STATUS_ENABLED !== 'undefined') {
     clay.setSettings({ BT_STATUS_ENABLED: !!e.payload.BT_STATUS_ENABLED });
   }
+  if (typeof e.payload.HOUR_MODE !== 'undefined') {
+    clay.setSettings({ HOUR_MODE: e.payload.HOUR_MODE });
+  }
   if (configurationOpenPending &&
       typeof e.payload.theme !== 'undefined' &&
       typeof e.payload.WEATHER_ENABLED !== 'undefined' &&
       typeof e.payload.WEATHER_SHOW_TEMP !== 'undefined' &&
       typeof e.payload.WEATHER_TEMP_UNIT !== 'undefined' &&
-      typeof e.payload.BT_STATUS_ENABLED !== 'undefined') {
+      typeof e.payload.BT_STATUS_ENABLED !== 'undefined' &&
+      typeof e.payload.HOUR_MODE !== 'undefined') {
     openConfiguration();
   }
   if (typeof e.payload.WEATHER_REQUEST !== 'undefined') {
