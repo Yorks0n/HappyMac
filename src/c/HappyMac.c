@@ -30,6 +30,7 @@ static int16_t s_weather_temp = INT16_MAX;
 static uint8_t s_weather_code = 255;
 static time_t s_last_weather = 0;
 static uint8_t s_weather_retry_count = 0;
+static int s_hour_mode = 0; //0 = System Default, 1 = 12h, 2 = 24h
 
 enum {
   THEME_LIGHT = 0,
@@ -56,6 +57,7 @@ enum {
   PERSIST_KEY_WEATHER_TEMP = 5,
   PERSIST_KEY_WEATHER_CODE = 6,
   PERSIST_KEY_BT_STATUS_ENABLED = 7,
+  PERSIST_KEY_HOUR_MODE = 8
 };
 
 static void apply_theme(void);
@@ -220,7 +222,7 @@ static void update_time() {
 #else
   strftime(s_buffer, sizeof(s_buffer), "%b %d %a", tick_time);
 #endif
-  strftime(s_time_buffer, sizeof(s_time_buffer), "%H:%M", tick_time);
+  strftime(s_time_buffer, sizeof(s_time_buffer), ((s_hour_mode == 0 && clock_is_24h_style()) || s_hour_mode == 2) ? "%H:%M" : "%I:%M", tick_time);
 
   for (char *p = s_buffer; *p; ++p) {
     *p = toupper((unsigned char)*p);
@@ -429,6 +431,7 @@ static void send_settings_to_phone(void) {
   dict_write_uint8(iter, MESSAGE_KEY_WEATHER_SHOW_TEMP, s_weather_show_temp ? 1 : 0);
   dict_write_uint8(iter, MESSAGE_KEY_WEATHER_TEMP_UNIT, s_weather_unit);
   dict_write_uint8(iter, MESSAGE_KEY_BT_STATUS_ENABLED, s_bt_status_enabled ? 1 : 0);
+  dict_write_int(iter, MESSAGE_KEY_HOUR_MODE, &s_hour_mode, sizeof(s_theme), 0);
   app_message_outbox_send();
 }
 
@@ -681,6 +684,14 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
     }
     request_weather();
   }
+
+  Tuple *hour_mode_tuple = dict_find(iter, MESSAGE_KEY_HOUR_MODE);
+  if (hour_mode_tuple) {
+    s_hour_mode = atoi(hour_mode_tuple->value->cstring);
+    persist_write_int(PERSIST_KEY_HOUR_MODE, s_hour_mode);
+    update_time();
+    send_settings_to_phone();
+  }
 }
 
 static void prv_window_load(Window *window) {
@@ -824,6 +835,9 @@ static void prv_init(void) {
   }
   if (persist_exists(PERSIST_KEY_BT_STATUS_ENABLED)) {
     s_bt_status_enabled = persist_read_bool(PERSIST_KEY_BT_STATUS_ENABLED);
+  }
+  if (persist_exists(PERSIST_KEY_HOUR_MODE)) {
+    s_hour_mode = persist_read_bool(PERSIST_KEY_HOUR_MODE);
   }
 
   s_window = window_create();
